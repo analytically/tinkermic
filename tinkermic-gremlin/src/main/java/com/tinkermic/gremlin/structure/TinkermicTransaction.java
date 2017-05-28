@@ -107,8 +107,7 @@ public final class TinkermicTransaction extends AbstractThreadLocalTransaction {
                             ":db/ident", entry.getKey(),
                             ":db/valueType", valueType,
                             ":db/cardinality", ":db.cardinality/one",
-                            ":db/index", true,
-                            ":db.install/_attribute", ":db.part/db");
+                            ":db/index", true);
                 }).collect(Collectors.toList()));
 
         context.get().vertexAttributes.clear();
@@ -122,8 +121,7 @@ public final class TinkermicTransaction extends AbstractThreadLocalTransaction {
                             ":db/ident", entry.getKey(),
                             ":db/valueType", valueType,
                             ":db/cardinality", ":db.cardinality/one",
-                            ":db/index", true,
-                            ":db.install/_attribute", ":db.part/db");
+                            ":db/index", true);
                 }).collect(Collectors.toList()));
 
         context.get().edgeAttributes.clear();

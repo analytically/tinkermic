@@ -187,9 +187,6 @@ public class TinkermicGraph implements Graph {
         TinkermicEdge edge = new TinkermicEdge(this, Optional.empty(), uuid, addition.tempId, label);
         tx().add(edge, addition.statements.get(0), out, in);
 
-        // Update the transaction info of both vertices (moving up their current transaction)
-//            addTransactionInfo(in, out);
-
         ElementHelper.attachProperties(edge, keyValues);
         return edge;
     }

@@ -84,8 +84,7 @@ public final class TinkermicHelper {
             statements.add(Util.map(":db/id", Peer.tempid(":db.part/db"),
                     ":db/ident", TinkermicUtil.createKey(prop.getKey(), prop.getValue(), elementType),
                     ":db/valueType", TinkermicUtil.javaTypeToDatomicType(prop.getValue()),
-                    ":db/cardinality", ":db.cardinality/one",
-                    ":db.install/_attribute", ":db.part/db"));
+                    ":db/cardinality", ":db.cardinality/one"));
         }
         return connection.transact(statements).get();
     }

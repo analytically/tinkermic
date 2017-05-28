@@ -363,7 +363,7 @@ public class TinkermicHelperTest {
     @Test
     public void testShortGetProperty() throws Exception {
         loadTestData();
-        Map<String, Class> props = ImmutableMap.of("age", (Class) Long.class);
+        Map<String, Class> props = ImmutableMap.of("age", Long.class);
         helper.installElementProperties(connection, props, Vertex.class);
         TinkermicHelper.Addition addProp = helper.addPropertyByUuid(getDb(), MARKO_ID, Vertex.class, "age", 30);
         connection.transact(addProp.statements);
@@ -386,10 +386,9 @@ public class TinkermicHelperTest {
     @Test
     public void testAddPropertyByUuidInTransaction() throws Exception {
         loadTestData();
-        Map<String, Class> props = ImmutableMap.of("age", (Class) Long.class);
+        Map<String, Class> props = ImmutableMap.of("age", Long.class);
         helper.installElementProperties(connection, props, Vertex.class);
         TinkermicHelper.Addition addProp = helper.addPropertyByUuid(getDb(), MARKO_ID, Vertex.class, "age", 30);
-        //connection.transact(addProp.statements);
         Object property = helper
                 .getPropertyByUuid(getDb(addProp.statements), MARKO_ID, Vertex.class, "age", Long.class);
         assertEquals(30, property);
@@ -398,7 +397,7 @@ public class TinkermicHelperTest {
     @Test
     public void testAddPropertyToNewVertexInTransaction() throws Exception {
         loadTestData();
-        Map<String, Class> props = ImmutableMap.of("age", (Class) Long.class);
+        Map<String, Class> props = ImmutableMap.of("age", Long.class);
         helper.installElementProperties(connection, props, Vertex.class);
         UUID newVertexId = Peer.squuid();
         TinkermicHelper.Addition addition = helper.vertexAddition(newVertexId, "label");
@@ -414,7 +413,7 @@ public class TinkermicHelperTest {
     @Test
     public void testAddAndRemovePropertyToNewVertexInTransaction() throws Exception {
         loadTestData();
-        Map<String, Class> props = ImmutableMap.of("age", (Class) Long.class);
+        Map<String, Class> props = ImmutableMap.of("age", Long.class);
         helper.installElementProperties(connection, props, Vertex.class);
         UUID newVertexId = Peer.squuid();
         TinkermicHelper.Addition addition = helper.vertexAddition(newVertexId, "label");
@@ -429,7 +428,7 @@ public class TinkermicHelperTest {
     @Test
     public void testAddPropertyOnEdge() throws Exception {
         loadTestData();
-        Map<String, Class> props = ImmutableMap.of("date", (Class) Long.class);
+        Map<String, Class> props = ImmutableMap.of("date", Long.class);
         helper.installElementProperties(connection, props, Edge.class);
         Long testDate = new Date(0).getTime();
         TinkermicHelper.Addition addProp = helper.addPropertyByUuid(getDb(), EDGE_ID, Edge.class, "date", testDate);

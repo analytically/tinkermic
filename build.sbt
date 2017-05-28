@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.8"
 )
 
-val tinkerpopVersion = "3.2.3"
+val tinkerpopVersion = "3.2.4"
 
 lazy val tinkermic = (project in file(".")).
   disablePlugins(sbtassembly.AssemblyPlugin).
@@ -55,17 +55,17 @@ lazy val gremlin = (project in file("tinkermic-gremlin")).
     testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-a"),
     fork := true,
     parallelExecution in Test := false,
-    resolvers += "my.datomic.com" at "https://my.datomic.com/repo",
+    resolvers += "clojars" at "https://clojars.org/repo",
     resolvers += "jitpack" at "https://jitpack.io",
     resolvers += "clojars" at "https://clojars.org/repo",
     libraryDependencies ++= Seq(
-      "org.slf4j" % "slf4j-api" % "1.7.22",
+      "org.slf4j" % "slf4j-api" % "1.7.25",
       "org.apache.tinkerpop" % "gremlin-core" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.apache.tinkerpop" % "gremlin-groovy" % tinkerpopVersion % Provided exclude("org.slf4j", "slf4j-log4j12"),
-      "com.datomic" % "datomic-free" % "0.9.5544" exclude("org.slf4j", "slf4j-nop") exclude("org.slf4j", "log4j-over-slf4j"),
-      "org.threeten" % "threeten-extra" % "1.0",
+      "com.datomic" % "datomic-free" % "0.9.5561" exclude("org.slf4j", "slf4j-nop") exclude("org.slf4j", "log4j-over-slf4j"),
+      "org.threeten" % "threeten-extra" % "1.1",
       "org.apache.tinkerpop" % "gremlin-test" % tinkerpopVersion % Test exclude("org.slf4j", "slf4j-log4j12"),
-      "ch.qos.logback" % "logback-classic" % "1.1.8" % Test,
+      "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
       "junit" % "junit" % "4.12" % Test,
       "com.novocode" % "junit-interface" % "0.11" % Test
     ),
@@ -90,13 +90,13 @@ lazy val benchmark = (project in file("tinkermic-gremlin-benchmark")).
   settings(
     name := "tinkermic-gremlin-benchmark",
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.1.7",
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
       "org.apache.tinkerpop" % "gremlin-test" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.apache.tinkerpop" % "neo4j-gremlin" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.neo4j" % "neo4j-tinkerpop-api-impl" % "0.4-3.0.3",
       "org.apache.tinkerpop" % "tinkergraph-gremlin" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
-      "org.openjdk.jmh" % "jmh-core" % "1.15",
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.15"
+      "org.openjdk.jmh" % "jmh-core" % "1.19",
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.19"
     ),
     crossPaths := false,
     assemblyJarName in assembly := "tinkermic-gremlin-benchmark.jar",
