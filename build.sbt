@@ -62,7 +62,7 @@ lazy val gremlin = (project in file("tinkermic-gremlin")).
       "org.slf4j" % "slf4j-api" % "1.7.25",
       "org.apache.tinkerpop" % "gremlin-core" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.apache.tinkerpop" % "gremlin-groovy" % tinkerpopVersion % Provided exclude("org.slf4j", "slf4j-log4j12"),
-      "com.datomic" % "datomic-free" % "0.9.5561" exclude("org.slf4j", "slf4j-nop") exclude("org.slf4j", "log4j-over-slf4j"),
+      "com.datomic" % "datomic-free" % "0.9.5561.50" exclude("org.slf4j", "slf4j-nop") exclude("org.slf4j", "log4j-over-slf4j"),
       "org.threeten" % "threeten-extra" % "1.1",
       "org.apache.tinkerpop" % "gremlin-test" % tinkerpopVersion % Test exclude("org.slf4j", "slf4j-log4j12"),
       "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
