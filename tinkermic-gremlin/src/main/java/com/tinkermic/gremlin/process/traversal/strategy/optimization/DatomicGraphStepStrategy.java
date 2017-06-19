@@ -22,13 +22,9 @@ public final class DatomicGraphStepStrategy extends AbstractTraversalStrategy<Tr
 
     @Override
     public void apply(final Traversal.Admin<?, ?> traversal) {
-        if (TraversalHelper.onGraphComputer(traversal))
-            return;
-
-        TraversalHelper.getStepsOfClass(GraphStep.class, traversal).forEach(originalGraphStep -> {
+        for (final GraphStep originalGraphStep : TraversalHelper.getStepsOfClass(GraphStep.class, traversal)) {
             final DatomicGraphStep<?, ?> datomicGraphStep = new DatomicGraphStep<>(originalGraphStep);
-            TraversalHelper.replaceStep(originalGraphStep, (Step) datomicGraphStep, traversal);
-
+            TraversalHelper.replaceStep(originalGraphStep, datomicGraphStep, traversal);
             Step<?, ?> currentStep = datomicGraphStep.getNextStep();
             while (currentStep instanceof HasStep || currentStep instanceof NoOpBarrierStep) {
                 if (currentStep instanceof HasStep) {
@@ -41,7 +37,7 @@ public final class DatomicGraphStepStrategy extends AbstractTraversalStrategy<Tr
                 }
                 currentStep = currentStep.getNextStep();
             }
-        });
+        }
     }
 
     public static DatomicGraphStepStrategy instance() {

@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.8"
 )
 
-val tinkerpopVersion = "3.2.4"
+val tinkerpopVersion = "3.2.5"
 
 lazy val tinkermic = (project in file(".")).
   disablePlugins(sbtassembly.AssemblyPlugin).
