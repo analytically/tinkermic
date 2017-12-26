@@ -11,8 +11,8 @@ import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.apache.tinkerpop.gremlin.structure.util.AbstractThreadLocalTransaction;
+§import org.apache.tinkerpop.gremlin.structure.util.TransactionException;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -39,27 +39,26 @@ public final class TinkermicTransaction extends AbstractThreadLocalTransaction {
     private static class Op {
         final OpType opType;
         Object statement;
-        final TinkermicElement[] touched;
+        final List<TinkermicElement> touched;
 
-        public Op(OpType opType, Object statement, TinkermicElement... touched) {
+        Op(OpType opType, Object statement) {
+            this.opType = opType;
+            this.statement = statement;
+            touched = Collections.emptyList();
+        }
+
+        Op(OpType opType, Object statement, List<TinkermicElement> touched) {
             this.opType = opType;
             this.statement = statement;
             this.touched = touched;
         }
 
-        public boolean concerns(TinkermicElement element) {
-            for (TinkermicElement t : touched) {
-                if (t.equals(element)) {
-                    return true;
-                }
-            }
-            return false;
+        boolean concerns(TinkermicElement element) {
+            return touched.contains(element);
         }
     }
 
     private static class TxContext {
-        private Instant validTime = null;
-
         // List of pending graph operations
         private LinkedHashMap<UUID, Op> operations = Maps.newLinkedHashMap();
 
@@ -156,7 +155,11 @@ public final class TinkermicTransaction extends AbstractThreadLocalTransaction {
         return op != null && op.opType == OpType.mod;
     }
 
-    public void add(TinkermicElement element, Object statement, TinkermicElement... touched) {
+    public void add(TinkermicElement element, Object statement) {
+        add(element, statement, Collections.emptyList());
+    }
+
+    public void add(TinkermicElement element, Object statement, List<TinkermicElement> touched) {
         context.get().operations.put(element.id(), new Op(OpType.add, statement, touched));
         context.get().dirty.put(element.graphId, element);
         context.get().revMap.put(element, element.graphId);

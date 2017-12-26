@@ -1,11 +1,9 @@
 package com.tinkermic.gremlin.structure;
 
 import com.google.common.base.CharMatcher;
-import com.tinkermic.gremlin.process.traversal.strategy.optimization.DatomicGraphStepStrategy;
 import datomic.*;
 import org.apache.commons.configuration.*;
 import org.apache.tinkerpop.gremlin.process.computer.GraphComputer;
-import org.apache.tinkerpop.gremlin.process.traversal.TraversalStrategies;
 import org.apache.tinkerpop.gremlin.structure.*;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
 import org.apache.tinkerpop.gremlin.structure.util.GraphFactory;
@@ -18,38 +16,17 @@ import java.util.stream.Stream;
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_PROCESS_STANDARD)
 @Graph.OptIn(Graph.OptIn.SUITE_STRUCTURE_INTEGRATE)
-@Graph.OptOut(
-        test = "org.apache.tinkerpop.gremlin.structure.VertexTest$BasicVertexTest",
-        method = "shouldNotGetConcurrentModificationException",
-        reason = "Fails occasionally on Travis CI due to threading issues on low-powered VM's"
-)
 @Graph.OptIn("com.tinkermic.gremlin.DatomicStrategySuite")
 public class TinkermicGraph implements Graph {
-    static {
-        TraversalStrategies.GlobalCache.registerStrategies(
-                TinkermicGraph.class,
-                TraversalStrategies.GlobalCache.getStrategies(Graph.class).clone().addStrategies(DatomicGraphStepStrategy.instance()));
-    }
-
     public static final String DATOMIC_DB_URI = "tinkermic.datomic.uri";
-    static final String DATOMIC_EXCEPTION_MESSAGE = "An error occured within the Datomic datastore.";
+    static final String DATOMIC_EXCEPTION_MESSAGE = "An error occurred within the Datomic datastore.";
 
-    private static final CharMatcher LABEL_MATCHER = CharMatcher.inRange('0', '9')
-            .or(CharMatcher.inRange('a', 'z'))
-            .or(CharMatcher.inRange('A', 'Z'))
-            .or(CharMatcher.inRange('0', '9'))
-            .precomputed();
+    private static final CharMatcher LABEL_MATCHER = CharMatcher.ASCII;
 
     private final BaseConfiguration configuration = new BaseConfiguration();
     private final Connection connection;
     private final Graph.Features features = new TinkermicFeatures();
     private final TinkermicHelper helper = new TinkermicHelper();
-
-    private final ThreadLocal<Long> asOfTransaction = new ThreadLocal<Long>() {
-        protected Long initialValue() {
-            return null;
-        }
-    };
 
     private final TinkermicTransaction transaction;
 
@@ -68,7 +45,6 @@ public class TinkermicGraph implements Graph {
         if (requiresMetaModel(connection.db())) {
             try {
                 helper().loadMetaModel(connection);
-                connection.transact(Util.list(Util.map(":db/id", Peer.tempid(":db.part/tx"), ":db/txInstant", new Date(0))));
             } catch (Exception e) {
                 throw new RuntimeException(DATOMIC_EXCEPTION_MESSAGE, e);
             }
@@ -169,7 +145,7 @@ public class TinkermicGraph implements Graph {
         return vertex;
     }
 
-    protected Edge addEdge(Vertex outVertex, Vertex inVertex, String label, Object... keyValues) {
+    protected Edge addEdge(TinkermicVertex outVertex, TinkermicVertex inVertex, String label, Object... keyValues) {
         if (null == inVertex) throw Graph.Exceptions.argumentCanNotBeNull("inVertex");
         ElementHelper.validateLabel(label);
         ElementHelper.legalPropertyKeyValueArray(keyValues);
@@ -181,11 +157,10 @@ public class TinkermicGraph implements Graph {
 
         // Create the new edge
         UUID uuid = Peer.squuid();
-        TinkermicVertex out = (TinkermicVertex) outVertex;
-        TinkermicVertex in = (TinkermicVertex) inVertex;
-        TinkermicHelper.Addition addition = helper().edgeAddition(uuid, label, out.graphId, in.graphId);
+
+        TinkermicHelper.Addition addition = helper().edgeAddition(uuid, label, outVertex.graphId, inVertex.graphId);
         TinkermicEdge edge = new TinkermicEdge(this, Optional.empty(), uuid, addition.tempId, label);
-        tx().add(edge, addition.statements.get(0), out, in);
+        tx().add(edge, addition.statements.get(0), Arrays.asList(outVertex, inVertex));
 
         ElementHelper.attachProperties(edge, keyValues);
         return edge;
@@ -196,19 +171,21 @@ public class TinkermicGraph implements Graph {
         if (0 == vertexIds.length) {
             tx().readWrite();
 
-            Iterable<List<Object>> vertices = helper().listVertices(database());
+            Database db = database();
+            Iterable<List<Object>> vertices = helper().listVertices(db);
             return IteratorUtils.stream(vertices)
-                    .map(v -> (Vertex) new TinkermicVertex(this, Optional.of(database()), (UUID) v.get(1), v.get(0), (String) v.get(2))).iterator();
+                    .map(v -> (Vertex) new TinkermicVertex(this, Optional.of(db), (UUID) v.get(1), v.get(0), (String) v.get(2))).iterator();
         } else {
             ElementHelper.validateMixedElementIds(Vertex.class, vertexIds);
-
             tx().readWrite();
+
+            Database db = database();
             return Stream.of(vertexIds)
                     .map(TinkermicUtil::externalIdToUuid)
                     .flatMap(uuid -> {
                         try {
-                            List<Object> v = helper().getVertex(database(), uuid);
-                            return Stream.of(new TinkermicVertex(this, Optional.of(database()), uuid, v.get(0), (String) v.get(2)));
+                            List<Object> v = helper().getVertex(db, uuid);
+                            return Stream.of(new TinkermicVertex(this, Optional.of(db), (UUID) v.get(1), v.get(0), (String) v.get(2)));
                         } catch (NoSuchElementException e) {
                             return Stream.empty();
                         }
@@ -222,19 +199,21 @@ public class TinkermicGraph implements Graph {
         if (0 == edgeIds.length) {
             tx().readWrite();
 
-            Iterable<List<Object>> edges = helper().listEdges(database());
+            Database db = database();
+            Iterable<List<Object>> edges = helper().listEdges(db);
             return IteratorUtils.stream(edges)
-                    .map(e -> (Edge) new TinkermicEdge(this, Optional.of(database()), (UUID) e.get(1), e.get(0), (String) e.get(2))).iterator();
+                    .map(e -> (Edge) new TinkermicEdge(this, Optional.of(db), (UUID) e.get(1), e.get(0), (String) e.get(2))).iterator();
         } else {
             ElementHelper.validateMixedElementIds(Edge.class, edgeIds);
 
             tx().readWrite();
+            Database db = database();
             return Stream.of(edgeIds)
                     .map(TinkermicUtil::externalIdToUuid)
                     .flatMap(uuid -> {
                         try {
-                            List<Object> e = helper().getEdge(database(), uuid);
-                            return Stream.of(new TinkermicEdge(this, Optional.of(database()), uuid, e.get(0), (String) e.get(2)));
+                            List<Object> e = helper().getEdge(db, uuid);
+                            return Stream.of(new TinkermicEdge(this, Optional.of(db), (UUID) e.get(1), e.get(0), (String) e.get(2)));
                         } catch (NoSuchElementException e) {
                             return Stream.empty();
                         }
@@ -243,19 +222,8 @@ public class TinkermicGraph implements Graph {
         }
     }
 
-    final Database databaseAsOf(Object transaction) {
-        Database database = tx().getDatabase();
-        if (transaction == null) {
-            return database;
-        }
-        return database.asOf(transaction);
-    }
-
     public final Database database() {
-        if (asOfTransaction.get() != null) {
-            return databaseAsOf(asOfTransaction.get());
-        }
-        return databaseAsOf(null);
+        return tx().getDatabase();
     }
 
     Connection connection() {

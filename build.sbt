@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.8"
 )
 
-val tinkerpopVersion = "3.2.5"
+val tinkerpopVersion = "3.3.1"
 
 lazy val tinkermic = (project in file(".")).
   disablePlugins(sbtassembly.AssemblyPlugin).
@@ -58,11 +58,13 @@ lazy val gremlin = (project in file("tinkermic-gremlin")).
     resolvers += "clojars" at "https://clojars.org/repo",
     resolvers += "jitpack" at "https://jitpack.io",
     resolvers += "clojars" at "https://clojars.org/repo",
+    resolvers += "my.datomic.com" at "https://my.datomic.com/repo",
+    credentials += Credentials(realm = "Datomic Maven Repo", host = "my.datomic.com", userName = "mathias.bogaert@gmail.com", passwd = "5fd44b06-2597-44e9-b9f9-4c5e204f62f8"),
     libraryDependencies ++= Seq(
       "org.slf4j" % "slf4j-api" % "1.7.25",
       "org.apache.tinkerpop" % "gremlin-core" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.apache.tinkerpop" % "gremlin-groovy" % tinkerpopVersion % Provided exclude("org.slf4j", "slf4j-log4j12"),
-      "com.datomic" % "datomic-free" % "0.9.5561.54" exclude("org.slf4j", "slf4j-nop") exclude("org.slf4j", "log4j-over-slf4j"),
+      "com.datomic" % "datomic-pro" % "0.9.5561.62" exclude("org.slf4j", "slf4j-nop") exclude("org.slf4j", "log4j-over-slf4j"),
       "org.threeten" % "threeten-extra" % "1.2",
       "org.apache.tinkerpop" % "gremlin-test" % tinkerpopVersion % Test exclude("org.slf4j", "slf4j-log4j12"),
       "ch.qos.logback" % "logback-classic" % "1.2.3" % Test,
@@ -93,7 +95,7 @@ lazy val benchmark = (project in file("tinkermic-gremlin-benchmark")).
       "ch.qos.logback" % "logback-classic" % "1.2.3",
       "org.apache.tinkerpop" % "gremlin-test" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.apache.tinkerpop" % "neo4j-gremlin" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
-      "org.neo4j" % "neo4j-tinkerpop-api-impl" % "0.4-3.0.3",
+      "org.neo4j" % "neo4j-tinkerpop-api-impl" % "0.7-3.2.3",
       "org.apache.tinkerpop" % "tinkergraph-gremlin" % tinkerpopVersion exclude("org.slf4j", "slf4j-log4j12"),
       "org.openjdk.jmh" % "jmh-core" % "1.19",
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.19"

@@ -504,7 +504,7 @@ public final class TinkermicHelper {
     }
 
     public Addition vertexAddition(UUID uuid, String label) {
-        Object tempId = Peer.tempid(":vertex");
+        Object tempId = Peer.tempid(":db.part/user");
         return new Addition(tempId, Util.list(Util.map(
                 ":db/id", tempId,
                 VERTEX_LABEL, label,
@@ -513,7 +513,7 @@ public final class TinkermicHelper {
     }
 
     public Addition edgeAddition(UUID uuid, String label, Object outVertex, Object inVertex) {
-        Object tempid = Peer.tempid(":edge");
+        Object tempid = Peer.tempid(":db.part/user");
         return new Addition(tempid, Util.list(Util.map(
                 ":db/id", tempid,
                 EDGE_LABEL, label,

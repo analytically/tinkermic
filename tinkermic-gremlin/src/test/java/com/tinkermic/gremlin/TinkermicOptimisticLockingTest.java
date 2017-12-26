@@ -3,7 +3,7 @@ package com.tinkermic.gremlin;
 import com.tinkermic.gremlin.structure.TinkermicGraph;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import org.apache.tinkerpop.gremlin.structure.util.AbstractTransaction;
+import org.apache.tinkerpop.gremlin.structure.util.TransactionException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class TinkermicOptimisticLockingTest {
             try {
                 graph.tx().commit();
             } catch (RuntimeException ex) {
-                if (ex.getCause() instanceof AbstractTransaction.TransactionException) commitFailed.set(true);
+                if (ex instanceof TransactionException) commitFailed.set(true);
             }
         });
 
@@ -124,7 +124,7 @@ public class TinkermicOptimisticLockingTest {
             try {
                 graph.tx().commit();
             } catch (RuntimeException ex) {
-                if (ex.getCause() instanceof AbstractTransaction.TransactionException) commitFailed.set(true);
+                if (ex instanceof TransactionException) commitFailed.set(true);
             }
         });
 
@@ -169,7 +169,7 @@ public class TinkermicOptimisticLockingTest {
             try {
                 graph.tx().commit();
             } catch (RuntimeException ex) {
-                if (ex.getCause() instanceof AbstractTransaction.TransactionException) commitFailed.set(true);
+                if (ex instanceof TransactionException) commitFailed.set(true);
             }
         });
 
@@ -216,7 +216,7 @@ public class TinkermicOptimisticLockingTest {
             try {
                 graph.tx().commit();
             } catch (RuntimeException ex) {
-                if (ex.getCause() instanceof AbstractTransaction.TransactionException) commitFailed.set(true);
+                if (ex instanceof TransactionException) commitFailed.set(true);
             }
         });
 

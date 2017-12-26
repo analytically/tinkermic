@@ -12,8 +12,8 @@ import static org.apache.tinkerpop.gremlin.structure.Direction.IN;
 import static org.apache.tinkerpop.gremlin.structure.Direction.OUT;
 
 public final class TinkermicVertex extends TinkermicElement implements Vertex {
-    public TinkermicVertex(TinkermicGraph tinkermicGraph, Optional<Database> database, UUID uuid, Object id, String label) {
-        super(tinkermicGraph, database, uuid, id, label);
+    public TinkermicVertex(TinkermicGraph tinkermicGraph, Optional<Database> database, UUID uuid, Object graphId, String label) {
+        super(tinkermicGraph, database, uuid, graphId, label);
     }
 
     @Override
@@ -43,9 +43,11 @@ public final class TinkermicVertex extends TinkermicElement implements Vertex {
     }
 
     @Override
-    public Edge addEdge(String label, Vertex inVertex, Object... keyValues) {
+    public Edge addEdge(String label, Vertex vertex, Object... keyValues) {
+        if (null == vertex) throw Graph.Exceptions.argumentCanNotBeNull("vertex");
         if (removed) throw elementRemoved(Vertex.class, id());
-        return graph.addEdge(this, inVertex, label, keyValues);
+
+        return graph.addEdge(this, (TinkermicVertex) vertex, label, keyValues);
     }
 
     @Override

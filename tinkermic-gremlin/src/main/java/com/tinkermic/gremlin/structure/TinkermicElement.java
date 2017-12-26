@@ -3,13 +3,10 @@ package com.tinkermic.gremlin.structure;
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.Sets;
 import datomic.Database;
-import datomic.Entity;
-import datomic.Peer;
 import datomic.Util;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Graph;
 import org.apache.tinkerpop.gremlin.structure.util.ElementHelper;
-import org.threeten.extra.Interval;
 
 import java.util.*;
 
@@ -27,14 +24,12 @@ public abstract class TinkermicElement implements Element {
     final String label;
     boolean removed = false;
 
-    private volatile int hashCode; // cache the hashcode of the UUID
-
     TinkermicElement(TinkermicGraph graph, Optional<Database> database, UUID uuid, Object graphId, String label) {
-        assert graph != null;
-        assert database != null;
-        assert uuid != null;
-        assert graphId != null;
-        assert label != null;
+        if (graph == null) throw new IllegalArgumentException("graph is null");
+        if (database == null) throw new IllegalArgumentException("database is null");
+        if (uuid == null) throw new IllegalArgumentException("uuid is null");
+        if (graphId == null) throw new IllegalArgumentException("graphId is null");
+        if (label == null) throw new IllegalArgumentException("label is null");
 
         this.database = database;
         this.graph = graph;
@@ -68,9 +63,7 @@ public abstract class TinkermicElement implements Element {
                     .filter(key -> !TinkermicUtil.isReservedKey(key) && !Graph.Hidden.isHidden(key))
                     .forEach(key -> {
                         Optional<String> propertyName = TinkermicUtil.getPropertyName(key);
-                        if (propertyName.isPresent()) {
-                            properties.add(propertyName.get());
-                        }
+                        propertyName.ifPresent(properties::add);
                     });
             return properties;
         } else {
@@ -98,12 +91,7 @@ public abstract class TinkermicElement implements Element {
 
     @Override
     public int hashCode() {
-        int result = hashCode;
-        if (result == 0) {
-            result = uuid.hashCode();
-            hashCode = result;
-        }
-        return result;
+        return ElementHelper.hashCode(this);
     }
 
     protected Database database() {
